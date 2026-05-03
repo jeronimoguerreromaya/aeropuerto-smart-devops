@@ -33,15 +33,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Cache de dependencias Gradle (~/.gradle/caches)
-      - name: Cache Gradle
-        uses: actions/cache@v4
+      # Instala Gradle directamente — el proyecto no tiene gradlew
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v3
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('flytrack-api/**/*.gradle*') }}
-          restore-keys: gradle-${{ runner.os }}-
+          gradle-version: '8.7'
 
       # Cache de SonarCloud para no re-descargar el scanner
       - name: Cache SonarCloud
@@ -53,13 +49,13 @@ jobs:
 
       - name: Ejecutar tests y generar reporte de cobertura
         working-directory: flytrack-api
-        run: ./gradlew test jacocoTestReport --no-daemon
+        run: gradle test jacocoTestReport --no-daemon
         env:
           SPRING_PROFILES_ACTIVE: test
 
       - name: Análisis de calidad con SonarCloud
         working-directory: flytrack-api
-        run: ./gradlew sonar --no-daemon
+        run: gradle sonar --no-daemon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -87,14 +83,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      # Cache de node_modules para no reinstalar en cada push
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: flytrack-front/node_modules
-          key: npm-${{ runner.os }}-${{ hashFiles('flytrack-front/package-lock.json') }}
-          restore-keys: npm-${{ runner.os }}-
+          # Cache integrado de setup-node — no necesita package-lock.json
+          cache: 'npm'
+          cache-dependency-path: flytrack-front/package.json
 
       - name: Instalar dependencias
         working-directory: flytrack-front
