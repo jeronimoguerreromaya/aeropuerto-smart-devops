@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  // En produccion, el frontend y el backend corren en el mismo host via Docker
-  apiUrl: '/api'
+  // URL del backend desplegado en Render — actualizado
+  apiUrl: 'https://flytrack-api.onrender.com/api'
 };
