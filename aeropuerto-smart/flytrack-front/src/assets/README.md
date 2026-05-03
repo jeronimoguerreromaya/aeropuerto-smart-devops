@@ -1,0 +1,2 @@
+# Assets
+Carpeta para recursos estáticos (imágenes, iconos, etc.)

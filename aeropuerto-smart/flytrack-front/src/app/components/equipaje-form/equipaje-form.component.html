@@ -1,0 +1,133 @@
+<section class="card">
+  <div class="card-header">
+    <h2>🧳 Reportar Inconveniente con Equipaje</h2>
+  </div>
+
+  <div *ngIf="errorMsg" class="alert-error">⚠️ {{ errorMsg }}</div>
+
+  <form (ngSubmit)="enviarReporte()" class="form-equipaje" novalidate>
+
+    <!-- Fila 1: Nombre y Documento -->
+    <div class="form-row">
+      <div class="form-group" [class.has-error]="errores['pasajeroNombre']">
+        <label for="nombre">Nombre completo <span class="required">*</span></label>
+        <input
+          id="nombre" type="text"
+          [(ngModel)]="form.pasajeroNombre" name="pasajeroNombre"
+          (blur)="validarCampo('pasajeroNombre')"
+          (ngModelChange)="validarCampo('pasajeroNombre')"
+          placeholder="Ej: Juan Carlos Pérez"
+          class="form-input"
+        />
+        <span class="field-error" *ngIf="errores['pasajeroNombre']">
+          ⚠ {{ errores['pasajeroNombre'] }}
+        </span>
+      </div>
+
+      <div class="form-group" [class.has-error]="errores['documentoPasajero']">
+        <label for="documento">Documento (CC / Pasaporte) <span class="required">*</span></label>
+        <input
+          id="documento" type="text"
+          [(ngModel)]="form.documentoPasajero" name="documentoPasajero"
+          (blur)="validarCampo('documentoPasajero')"
+          (ngModelChange)="validarCampo('documentoPasajero')"
+          placeholder="Ej: 1234567890"
+          class="form-input"
+        />
+        <span class="field-error" *ngIf="errores['documentoPasajero']">
+          ⚠ {{ errores['documentoPasajero'] }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Fila 2: Email y Teléfono -->
+    <div class="form-row">
+      <div class="form-group" [class.has-error]="errores['email']">
+        <label for="email">Correo electrónico <span class="required">*</span></label>
+        <input
+          id="email" type="email"
+          [(ngModel)]="form.email" name="email"
+          (blur)="validarCampo('email')"
+          (ngModelChange)="validarCampo('email')"
+          placeholder="Ej: juan@correo.com"
+          class="form-input"
+        />
+        <span class="field-error" *ngIf="errores['email']">
+          ⚠ {{ errores['email'] }}
+        </span>
+      </div>
+
+      <div class="form-group" [class.has-error]="errores['telefono']">
+        <label for="telefono">Teléfono de contacto</label>
+        <input
+          id="telefono" type="tel"
+          [(ngModel)]="form.telefono" name="telefono"
+          (blur)="validarCampo('telefono')"
+          (ngModelChange)="validarCampo('telefono')"
+          placeholder="Ej: +57 300 123 4567"
+          class="form-input"
+        />
+        <span class="field-error" *ngIf="errores['telefono']">
+          ⚠ {{ errores['telefono'] }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Vuelo -->
+    <div class="form-group">
+      <label for="vuelo">Vuelo relacionado <span class="required">*</span></label>
+      <select id="vuelo" [(ngModel)]="form.vueloId" name="vueloId" class="form-input">
+        <option [ngValue]="null" disabled>Selecciona tu vuelo</option>
+        <option *ngFor="let vuelo of vuelos" [ngValue]="vuelo.id">
+          {{ vuelo.numeroVuelo }} — {{ vuelo.origen }} → {{ vuelo.destino }}
+          (Puerta: {{ vuelo.puertaEmbarque ?? 'N/A' }})
+        </option>
+      </select>
+    </div>
+
+    <!-- Descripción -->
+    <div class="form-group" [class.has-error]="errores['descripcion']">
+      <label for="descripcion">Descripción del inconveniente <span class="required">*</span></label>
+      <textarea
+        id="descripcion"
+        [(ngModel)]="form.descripcion" name="descripcion"
+        (blur)="validarCampo('descripcion')"
+        (ngModelChange)="validarCampo('descripcion')"
+        placeholder="Describe detalladamente el problema con tu equipaje..."
+        class="form-input" rows="4"
+      ></textarea>
+      <div class="field-footer">
+        <span class="field-error" *ngIf="errores['descripcion']">⚠ {{ errores['descripcion'] }}</span>
+        <span class="char-count" [class.warn]="form.descripcion.length > 400">
+          {{ form.descripcion.length }} / 500
+        </span>
+      </div>
+    </div>
+
+    <div class="form-footer">
+      <p class="required-note"><span class="required">*</span> Campos obligatorios</p>
+      <button type="submit" class="btn-submit" [disabled]="enviando">
+        {{ enviando ? 'Enviando...' : '📨 Enviar Reporte' }}
+      </button>
+    </div>
+  </form>
+</section>
+
+<!-- Modal de éxito -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-icon">✅</div>
+    <h3 class="modal-title">¡Reporte enviado!</h3>
+    <p class="modal-body">
+      Tu reporte fue registrado exitosamente. Guarda tu número de radicado para hacer seguimiento.
+    </p>
+    <div class="modal-radicado">
+      <span class="radicado-label">Número de radicado</span>
+      <span class="radicado-numero">{{ numeroRadicado }}</span>
+    </div>
+    <p class="modal-contacto">
+      Nos pondremos en contacto contigo a través del correo y teléfono registrados.
+    </p>
+    <button class="btn-modal-cerrar" (click)="cerrarModal()">Entendido</button>
+  </div>
+</div>
