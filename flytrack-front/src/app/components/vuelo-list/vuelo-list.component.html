@@ -1,0 +1,71 @@
+<section class="card">
+  <div class="card-header">
+    <h2>✈️ Itinerario de Vuelos</h2>
+    <button class="btn-refresh" (click)="cargarVuelos()">🔄 Actualizar</button>
+  </div>
+
+  <!-- Buscador -->
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input
+      type="text"
+      [(ngModel)]="busqueda"
+      (ngModelChange)="filtrar()"
+      placeholder="Buscar por número de vuelo, origen o destino..."
+      class="search-input"
+    />
+    <button *ngIf="busqueda" class="btn-clear" (click)="busqueda=''; filtrar()">✕</button>
+  </div>
+
+  <div *ngIf="cargando" class="loading">Cargando vuelos...</div>
+  <div *ngIf="error" class="error-msg">{{ error }}</div>
+
+  <div *ngIf="!cargando && !error">
+    <div *ngIf="vuelosFiltrados.length === 0 && vuelos.length === 0" class="empty-msg">
+      No hay vuelos disponibles en este momento.
+    </div>
+    <div *ngIf="vuelosFiltrados.length === 0 && vuelos.length > 0" class="empty-msg">
+      No se encontraron vuelos para "<strong>{{ busqueda }}</strong>".
+    </div>
+
+    <!-- Grid de tarjetas -->
+    <div class="vuelos-grid">
+      <div
+        *ngFor="let vuelo of vuelosFiltrados"
+        [class]="'vuelo-card ' + getEstadoClase(vuelo.estado)"
+      >
+        <!-- Cabecera de la tarjeta -->
+        <div class="vuelo-card-header">
+          <span class="vuelo-numero">{{ vuelo.numeroVuelo }}</span>
+          <span class="vuelo-estado-badge">
+            {{ getEstadoIcono(vuelo.estado) }} {{ vuelo.estado }}
+          </span>
+        </div>
+
+        <!-- Ruta -->
+        <div class="vuelo-ruta">
+          <div class="vuelo-ciudad">
+            <span class="ciudad-label">Origen</span>
+            <span class="ciudad-nombre">{{ vuelo.origen }}</span>
+          </div>
+          <span class="vuelo-flecha">→</span>
+          <div class="vuelo-ciudad text-right">
+            <span class="ciudad-label">Destino</span>
+            <span class="ciudad-nombre">{{ vuelo.destino }}</span>
+          </div>
+        </div>
+
+        <!-- Puerta -->
+        <div class="vuelo-puerta">
+          <span class="puerta-label">🚪 Puerta de embarque</span>
+          <span class="puerta-valor">{{ vuelo.puertaEmbarque ?? '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contador -->
+    <p *ngIf="vuelosFiltrados.length > 0" class="resultado-count">
+      Mostrando {{ vuelosFiltrados.length }} de {{ vuelos.length }} vuelos
+    </p>
+  </div>
+</section>
