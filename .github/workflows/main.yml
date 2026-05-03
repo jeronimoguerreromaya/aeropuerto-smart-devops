@@ -11,6 +11,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
 
   # ─────────────────────────────────────────────
@@ -24,7 +27,6 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
         with:
-          # SonarCloud necesita el historial completo para blame annotations
           fetch-depth: 0
 
       - name: Configurar Java 17
@@ -33,13 +35,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Instala Gradle directamente — el proyecto no tiene gradlew
-      - name: Configurar Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Configurar Gradle 8.7
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
 
-      # Cache de SonarCloud para no re-descargar el scanner
       - name: Cache SonarCloud
         uses: actions/cache@v4
         with:
@@ -83,9 +83,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          # Cache integrado de setup-node — no necesita package-lock.json
-          cache: 'npm'
-          cache-dependency-path: flytrack-front/package.json
 
       - name: Instalar dependencias
         working-directory: flytrack-front
@@ -103,8 +100,6 @@ jobs:
 
   # ─────────────────────────────────────────────
   # JOB 3: Build y push de imágenes Docker
-  # Solo corre si ambos jobs de test pasan
-  # Solo en push a main (no en PRs)
   # ─────────────────────────────────────────────
   build-and-push:
     name: 🐳 Build & Push Docker Images
@@ -114,7 +109,7 @@ jobs:
 
     permissions:
       contents: read
-      packages: write   # necesario para push a ghcr.io
+      packages: write
 
     steps:
       - name: Checkout código
@@ -127,7 +122,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Metadata para taggear las imágenes con SHA y 'latest'
       - name: Metadata imagen Backend
         id: meta-api
         uses: docker/metadata-action@v5
@@ -146,7 +140,6 @@ jobs:
             type=sha,prefix=sha-
             type=raw,value=latest
 
-      # BuildKit para builds más rápidos con cache
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -171,9 +164,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────
-  # JOB 4: Deploy a staging (SSH + Docker Compose)
-  # Solo corre si el build fue exitoso
-  # Solo en push a main
+  # JOB 4: Deploy a staging
   # ─────────────────────────────────────────────
   deploy:
     name: 🚀 Deploy a Staging
@@ -196,17 +187,9 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd ~/aeropuerto-smart-devops
-
-            # Actualizar el código
             git pull origin main
-
-            # Login al registry desde el servidor
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io \
               -u ${{ github.actor }} --password-stdin
-
-            # Bajar las nuevas imágenes y levantar los servicios
             docker compose pull
             docker compose up -d --remove-orphans
-
-            # Limpiar imágenes antiguas
             docker image prune -f
