@@ -192,7 +192,6 @@ jobs:
 
     environment:
       name: staging
-      url: http://${{ secrets.DEPLOY_HOST }}
 
     steps:
       - name: Checkout código
