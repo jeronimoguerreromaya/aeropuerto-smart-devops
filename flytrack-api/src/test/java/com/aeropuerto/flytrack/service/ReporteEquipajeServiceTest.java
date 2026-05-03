@@ -2,6 +2,7 @@ package com.aeropuerto.flytrack.service;
 
 import com.aeropuerto.flytrack.domain.ReporteEquipaje;
 import com.aeropuerto.flytrack.domain.Vuelo;
+import com.aeropuerto.flytrack.dto.ReporteEquipajeDTO;
 import com.aeropuerto.flytrack.repository.ReporteEquipajeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,6 +47,9 @@ class ReporteEquipajeServiceTest {
         reporteEjemplo = ReporteEquipaje.builder()
                 .id(1L)
                 .pasajeroNombre("Juan Pérez")
+                .documentoPasajero("123456789")
+                .email("juan@email.com")
+                .telefono("3001234567")
                 .descripcion("Maleta perdida")
                 .vuelo(vueloEjemplo)
                 .estadoReclamo("PENDIENTE")
@@ -58,7 +62,9 @@ class ReporteEquipajeServiceTest {
         when(vueloService.buscarPorId(1L)).thenReturn(vueloEjemplo);
         when(reporteRepository.save(any(ReporteEquipaje.class))).thenReturn(reporteEjemplo);
 
-        ReporteEquipaje resultado = reporteService.crearReporte("Juan Pérez", "Maleta perdida", 1L);
+        // crearReporte ahora recibe: nombre, documento, email, telefono, descripcion, vueloId
+        ReporteEquipajeDTO resultado = reporteService.crearReporte(
+                "Juan Pérez", "123456789", "juan@email.com", "3001234567", "Maleta perdida", 1L);
 
         assertThat(resultado.getPasajeroNombre()).isEqualTo("Juan Pérez");
         assertThat(resultado.getEstadoReclamo()).isEqualTo("PENDIENTE");
@@ -71,7 +77,8 @@ class ReporteEquipajeServiceTest {
         when(reporteRepository.findById(1L)).thenReturn(Optional.of(reporteEjemplo));
         when(reporteRepository.save(any(ReporteEquipaje.class))).thenAnswer(i -> i.getArgument(0));
 
-        ReporteEquipaje resultado = reporteService.actualizarEstado(1L, "EN_PROCESO");
+        // actualizarEstado retorna ReporteEquipajeDTO
+        ReporteEquipajeDTO resultado = reporteService.actualizarEstado(1L, "EN_PROCESO");
 
         assertThat(resultado.getEstadoReclamo()).isEqualTo("EN_PROCESO");
     }
@@ -82,6 +89,7 @@ class ReporteEquipajeServiceTest {
         when(reporteRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reporteService.buscarPorId(99L))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("99");
     }
 }
