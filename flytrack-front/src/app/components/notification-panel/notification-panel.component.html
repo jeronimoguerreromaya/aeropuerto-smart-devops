@@ -36,6 +36,10 @@
             &bull;
             {{ notif.vuelo?.origen }} → {{ notif.vuelo?.destino }}
             &bull;
+            <span *ngIf="notif.vuelo?.puertaEmbarque" class="notif-puerta">
+              🚪 Puerta {{ notif.vuelo?.puertaEmbarque }}
+            </span>
+            <span *ngIf="notif.vuelo?.puertaEmbarque">&bull;</span>
             {{ notif.fechaEnvio | date:'dd/MM/yyyy HH:mm' }}
           </small>
         </div>

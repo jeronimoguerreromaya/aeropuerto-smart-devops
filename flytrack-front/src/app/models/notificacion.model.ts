@@ -9,5 +9,6 @@ export interface Notificacion {
     origen: string;
     destino: string;
     estado: string;
+    puertaEmbarque?: string;
   };
 }
