@@ -20,6 +20,7 @@ public class ReporteEquipajeDTO {
     private final LocalDateTime fechaReporte;
     private final VueloResumenDTO vuelo;
 
+    //datos necesarios para mostrar el reporte de equipaje sin cargar toda la entidad vuelo
     public ReporteEquipajeDTO(ReporteEquipaje r) {
         this.id = r.getId();
         this.pasajeroNombre = r.getPasajeroNombre();
