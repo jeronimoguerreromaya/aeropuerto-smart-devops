@@ -37,6 +37,7 @@
 /* ── Navegación ── */
 .app-nav {
   display: flex;
+  justify-content: center;
   gap: 0.4rem;
   padding: 0.6rem 1rem;
   background-color: #fff;

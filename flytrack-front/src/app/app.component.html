@@ -19,17 +19,18 @@
       ✈️ Itinerarios
     </button>
     <button
-      [class.active]="vistaActual === 'notificaciones'"
-      (click)="cambiarVista('notificaciones')"
-    >
-      🔔 Notificaciones
-    </button>
-    <button
       [class.active]="vistaActual === 'equipaje'"
       (click)="cambiarVista('equipaje')"
     >
       🧳 Reportar Equipaje
     </button>
+    <button
+      [class.active]="vistaActual === 'notificaciones'"
+      (click)="cambiarVista('notificaciones')"
+    >
+      🔔 Notificaciones
+    </button>
+    
   </nav>
 
   <!-- Contenido principal -->
